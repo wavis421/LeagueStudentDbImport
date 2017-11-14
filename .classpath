@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/leagueDataManagerController_V1.1.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.egit.github.core-2.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.40-bin.jar"/>
@@ -10,6 +9,7 @@
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/leagueDataManagerModel_V1.1.jar"/>
+	<classpathentry kind="lib" path="lib/leagueDataManagerController.jar"/>
+	<classpathentry kind="lib" path="lib/leagueDataManagerModel.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
