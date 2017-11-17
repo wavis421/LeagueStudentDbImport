@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/leagueDataManagerController.jar"/>
-	<classpathentry kind="lib" path="lib/leagueDataManagerModel.jar"/>
+	<classpathentry kind="lib" path="lib/leagueDataManager.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
