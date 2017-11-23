@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import model.ActivityEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentNameModel;
 
@@ -43,6 +44,7 @@ public class StudentTracker {
 		Pike13ApiController pike13Controller = new Pike13ApiController(sqlDb, pike13Token);
 		importStudentsFromPike13(pike13Controller);
 		importActivitiesFromPike13(startDateString, pike13Controller);
+		importScheduleFromPike13(pike13Controller);
 
 		GitApiController gitController = new GitApiController(sqlDb, githubToken);
 		importGithubComments(startDateString, gitController);
@@ -78,18 +80,29 @@ public class StudentTracker {
 		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
+	public void importScheduleFromPike13(Pike13ApiController pike13Controller) {
+		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, " ***");
+
+		// Get data from Pike13
+		ArrayList<ScheduleModel> scheduleList = pike13Controller.getSchedule();
+
+		// Update changes in database
+		if (scheduleList.size() > 0)
+			sqlDb.importSchedule(scheduleList);
+
+		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+	}
+
 	public void importGithubComments(String startDate, GitApiController gitController) {
 		boolean result;
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting after " + startDate + " ***");
 
 		result = gitController.importGithubComments(startDate);
-		if (result)
+		if (result) {
 			gitController.importGithubCommentsByLevel(0, startDate);
-
-		if (result)
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
-		else
+		} else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 					": Github API rate limit exceeded ***");
 	}
