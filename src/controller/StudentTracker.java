@@ -41,23 +41,23 @@ public class StudentTracker {
 		}
 
 		// Import all the League databases
-		Pike13ApiController pike13Controller = new Pike13ApiController(sqlDb, pike13Token);
-		importStudentsFromPike13(pike13Controller);
-		importActivitiesFromPike13(startDateString, pike13Controller);
-		importScheduleFromPike13(pike13Controller);
+		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
+		importStudentsFromPike13(pike13Api);
+		importActivitiesFromPike13(startDateString, pike13Api);
+		importScheduleFromPike13(pike13Api);
 
-		GitApiController gitController = new GitApiController(sqlDb, githubToken);
-		importGithubComments(startDateString, gitController);
+		GithubApi githubApi = new GithubApi(sqlDb, githubToken);
+		importGithubComments(startDateString, githubApi);
 
 		sqlDb.disconnectDatabase();
 		System.exit(0);
 	}
 
-	public void importStudentsFromPike13(Pike13ApiController pike13Controller) {
+	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, " ***");
 
 		// Get data from Pike13
-		ArrayList<StudentImportModel> studentList = pike13Controller.getClients();
+		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
 
 		// Update changes in database
 		if (studentList.size() > 0)
@@ -66,12 +66,12 @@ public class StudentTracker {
 		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
-	public void importActivitiesFromPike13(String startDate, Pike13ApiController pike13Controller) {
+	public void importActivitiesFromPike13(String startDate, Pike13Api pike13Api) {
 		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting after " + startDate + " ***");
 
 		// Get data from Pike13
-		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment(startDate);
+		ArrayList<ActivityEventModel> eventList = pike13Api.getEnrollment(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
@@ -80,11 +80,11 @@ public class StudentTracker {
 		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
-	public void importScheduleFromPike13(Pike13ApiController pike13Controller) {
+	public void importScheduleFromPike13(Pike13Api pike13Api) {
 		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, " ***");
 
 		// Get data from Pike13
-		ArrayList<ScheduleModel> scheduleList = pike13Controller.getSchedule();
+		ArrayList<ScheduleModel> scheduleList = pike13Api.getSchedule();
 
 		// Update changes in database
 		if (scheduleList.size() > 0)
@@ -93,15 +93,18 @@ public class StudentTracker {
 		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
-	public void importGithubComments(String startDate, GitApiController gitController) {
+	public void importGithubComments(String startDate, GithubApi githubApi) {
 		boolean result;
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting after " + startDate + " ***");
 
-		result = gitController.importGithubComments(startDate);
+		result = githubApi.importGithubComments(startDate, 0);
 		if (result) {
-			gitController.importGithubCommentsByLevel(0, startDate);
+			githubApi.importGithubCommentsByLevel(0, startDate, 0);
+			githubApi.updateMissingGithubComments();
+
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+
 		} else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 					": Github API rate limit exceeded ***");
