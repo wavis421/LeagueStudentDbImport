@@ -10,6 +10,7 @@ import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
 import model.StudentImportModel;
+import model.StudentModel;
 import model.StudentNameModel;
 
 public class StudentTracker {
@@ -23,7 +24,7 @@ public class StudentTracker {
 	}
 
 	public StudentTracker() {
-		// Import data starting 4 days ago
+		// Import data starting 7 days ago
 		DateTime startDate = new DateTime().minusDays(7);
 		String startDateString = startDate.toString().substring(0, 10);
 
@@ -70,12 +71,20 @@ public class StudentTracker {
 		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting after " + startDate + " ***");
 
-		// Get data from Pike13
-		ArrayList<AttendanceEventModel> eventList = pike13Api.getEnrollment(startDate);
+		// Get attendance data from Pike13 for all students
+		ArrayList<AttendanceEventModel> eventList = pike13Api.getAttendance(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
 			sqlDb.importAttendance(eventList);
+		
+		// Get 'missing' attendance for new and returned students
+		ArrayList<StudentModel> newStudents = sqlDb.getStudentsUsingFlag("NewStudent");
+		if (newStudents.size() > 0) {
+			eventList = pike13Api.getMissingAttendance(startDate, newStudents);
+			if (eventList.size() > 0)
+				sqlDb.importAttendance(eventList);
+		}
 
 		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
