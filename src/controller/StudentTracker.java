@@ -1,5 +1,8 @@
 package controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
@@ -14,9 +17,6 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class StudentTracker {
-	// Different port than League Data Manager to allow simultaneous connects
-	private static final int LOCAL_SSH_PORT = 6000;
-
 	private MySqlDatabase sqlDb;
 
 	public static void main(String[] args) {
@@ -31,11 +31,17 @@ public class StudentTracker {
 		// Retrieve tokens and passwords
 		Preferences prefs = Preferences.userRoot();
 		String githubToken = prefs.get("GithubToken", "");
+		if (githubToken.equals(""))
+			githubToken = readFile("./githubToken.txt");
 		String pike13Token = prefs.get("Pike13Token", "");
+		if (pike13Token.equals(""))
+			pike13Token = readFile("./pike13Token.txt");
 		String awsPassword = prefs.get("AWSPassword", "");
+		if (awsPassword.equals(""))
+			awsPassword = readFile("./awsPassword.txt");
 
 		// Connect to database
-		sqlDb = new MySqlDatabase(awsPassword, LOCAL_SSH_PORT);
+		sqlDb = new MySqlDatabase(awsPassword, MySqlDatabase.STUDENT_IMPORT_SSH_PORT);
 		if (!sqlDb.connectDatabase()) {
 			// TODO: Handle this error
 			System.exit(0);
@@ -77,7 +83,7 @@ public class StudentTracker {
 		// Update changes in database
 		if (eventList.size() > 0)
 			sqlDb.importAttendance(eventList);
-		
+
 		// Get 'missing' attendance for new and returned students
 		ArrayList<StudentModel> newStudents = sqlDb.getStudentsUsingFlag("NewStudent");
 		if (newStudents.size() > 0) {
@@ -117,5 +123,22 @@ public class StudentTracker {
 		} else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 					": Github API rate limit exceeded ***");
+	}
+
+	private String readFile(String filename) {
+		try {
+			File file = new File(filename);
+			FileInputStream fis = new FileInputStream(file);
+
+			byte[] data = new byte[(int) file.length()];
+			fis.read(data);
+			fis.close();
+
+			return new String(data, "UTF-8");
+
+		} catch (IOException e) {
+			// Do nothing if file is not there
+		}
+		return "";
 	}
 }
