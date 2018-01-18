@@ -61,7 +61,9 @@ public class StudentTracker {
 	}
 
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
-		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, " ***");
+		String today = new DateTime().toString("yyyy-MM-dd").substring(0, 10);
+		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, 
+				" for " + today + " ***");
 
 		// Get data from Pike13
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
@@ -70,12 +72,13 @@ public class StudentTracker {
 		if (studentList.size() > 0)
 			sqlDb.importStudents(studentList);
 
-		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+				" for " + today + " ***");
 	}
 
 	public void importAttendanceFromPike13(String startDate, Pike13Api pike13Api) {
 		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
-				" starting after " + startDate + " ***");
+				" starting from " + startDate + " ***");
 
 		// Get attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getAttendance(startDate);
@@ -92,33 +95,38 @@ public class StudentTracker {
 				sqlDb.importAttendance(eventList);
 		}
 
-		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+				" starting from " + startDate + " ***");
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
-		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, " ***");
+		String startDate = new DateTime().minusDays(14).toString("yyyy-MM-dd");
+		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, 
+				" as of " + startDate.substring(0, 10) + " ***");
 
 		// Get data from Pike13
-		ArrayList<ScheduleModel> scheduleList = pike13Api.getSchedule();
+		ArrayList<ScheduleModel> scheduleList = pike13Api.getSchedule(startDate);
 
 		// Update changes in database
 		if (scheduleList.size() > 0)
 			sqlDb.importSchedule(scheduleList);
 
-		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+				" as of " + startDate.substring(0, 10) + " ***");
 	}
 
 	public void importGithubComments(String startDate, GithubApi githubApi) {
 		boolean result;
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
-				" starting after " + startDate + " ***");
+				" starting from " + startDate + " ***");
 
 		result = githubApi.importGithubComments(startDate, 0);
 		if (result) {
 			githubApi.importGithubCommentsByLevel(0, startDate, 0);
 			githubApi.updateMissingGithubComments();
 
-			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+					" starting from " + startDate + " ***");
 
 		} else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
