@@ -16,14 +16,14 @@ import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
 
-public class StudentTracker {
+public class StudentDataImport {
 	private MySqlDatabase sqlDb;
 
 	public static void main(String[] args) {
-		new StudentTracker();
+		new StudentDataImport().importStudentTrackerData();
 	}
-
-	public StudentTracker() {
+	
+	public void importStudentTrackerData() {
 		// Import data starting 7 days ago
 		DateTime startDate = new DateTime().minusDays(7);
 		String startDateString = startDate.toString().substring(0, 10);
