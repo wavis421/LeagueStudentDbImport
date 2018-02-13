@@ -22,7 +22,7 @@ public class StudentDataImport {
 	public static void main(String[] args) {
 		new StudentDataImport().importStudentTrackerData();
 	}
-	
+
 	public void importStudentTrackerData() {
 		// Import data starting 7 days ago
 		DateTime startDate = new DateTime().minusDays(7);
@@ -62,7 +62,7 @@ public class StudentDataImport {
 
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		String today = new DateTime().toString("yyyy-MM-dd").substring(0, 10);
-		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 
 		// Get data from Pike13
@@ -72,7 +72,7 @@ public class StudentDataImport {
 		if (studentList.size() > 0)
 			sqlDb.importStudents(studentList);
 
-		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 	}
 
@@ -95,13 +95,13 @@ public class StudentDataImport {
 				sqlDb.importAttendance(eventList);
 		}
 
-		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
 		String startDate = new DateTime().minusDays(14).toString("yyyy-MM-dd");
-		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 
 		// Get data from Pike13
@@ -111,7 +111,7 @@ public class StudentDataImport {
 		if (scheduleList.size() > 0)
 			sqlDb.importSchedule(scheduleList);
 
-		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 	}
 
@@ -120,17 +120,45 @@ public class StudentDataImport {
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 
-		result = githubApi.importGithubComments(startDate, 0);
-		if (result) {
-			githubApi.importGithubCommentsByLevel(0, startDate, 0);
-			githubApi.updateMissingGithubComments();
+		// Get list of events with missing comments
+		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, 0, false);
+		if (eventList.size() > 0) {
+			// Import Github comments
+			result = githubApi.importGithubComments(startDate, eventList);
 
-			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
-					" starting from " + startDate + " ***");
+			if (result) {
+				// Remove updated events from eventList before processing further
+				removeUpdatedGithubEvents(eventList);
 
-		} else
-			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
-					": Github API rate limit exceeded ***");
+				if (eventList.size() > 0) {
+					// Import github comments for level 0
+					githubApi.importGithubCommentsByLevel(0, startDate, eventList);
+
+					// Update any remaining null comments to show event was processed
+					githubApi.updateEmptyGithubComments(eventList);
+				}
+
+				// Updated github comments for users with new user name
+				githubApi.updateMissingGithubComments();
+
+			} else {
+				sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+						": Github API rate limit exceeded ***");
+				return;
+			}
+		}
+
+		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+				" starting from " + startDate + " ***");
+	}
+
+	private void removeUpdatedGithubEvents(ArrayList<AttendanceEventModel> eventList) {
+		for (int i = eventList.size() - 1; i >= 0; i--) {
+			AttendanceEventModel model = eventList.get(i);
+			if (!model.getGithubComments().equals("")) {
+				eventList.remove(model);
+			}
+		}
 	}
 
 	private String readFile(String filename) {
