@@ -132,11 +132,16 @@ public class StudentDataImport {
 				removeUpdatedGithubEvents(eventList);
 
 				if (eventList.size() > 0) {
-					// Import github comments for level 0
-					githubApi.importGithubCommentsByLevel(0, startDate, eventList);
+					// Import github comments for level 0 & 1
+					githubApi.importGithubCommentsByLevel(0, startDate, null, eventList);
+					removeUpdatedGithubEvents(eventList);
 
-					// Update any remaining null comments to show event was processed
-					githubApi.updateEmptyGithubComments(eventList);
+					if (eventList.size() > 0) {
+						githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
+
+						// Update any remaining null comments to show event was processed
+						githubApi.updateEmptyGithubComments(eventList);
+					}
 				}
 
 				// Updated github comments for users with new user name
