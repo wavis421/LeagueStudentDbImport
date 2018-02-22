@@ -44,6 +44,7 @@ public class StudentDataImport {
 		sqlDb = new MySqlDatabase(awsPassword, MySqlDatabase.STUDENT_IMPORT_SSH_PORT);
 		if (!sqlDb.connectDatabase()) {
 			// TODO: Handle this error
+			System.out.println("Failed to connect to MySql database");
 			System.exit(0);
 		}
 
