@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
 import model.LogDataModel;
@@ -25,8 +26,8 @@ public class StudentDataImport {
 
 	public void importStudentTrackerData() {
 		// Import data starting 7 days ago
-		DateTime startDate = new DateTime().minusDays(7);
-		String startDateString = startDate.toString().substring(0, 10);
+		String startDateString = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusDays(7)
+				.toString().substring(0, 10);
 
 		// Retrieve tokens and passwords
 		Preferences prefs = Preferences.userRoot();
@@ -48,12 +49,13 @@ public class StudentDataImport {
 			System.exit(0);
 		}
 
-		// Import all the League databases
+		// Connect to Pike13 and import data
 		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
 		importStudentsFromPike13(pike13Api);
 		importAttendanceFromPike13(startDateString, pike13Api);
 		importScheduleFromPike13(pike13Api);
 
+		// Connect to Github and import data
 		GithubApi githubApi = new GithubApi(sqlDb, githubToken);
 		importGithubComments(startDateString, githubApi);
 
@@ -62,7 +64,8 @@ public class StudentDataImport {
 	}
 
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
-		String today = new DateTime().toString("yyyy-MM-dd").substring(0, 10);
+		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd")
+				.substring(0, 10);
 		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 
@@ -101,7 +104,8 @@ public class StudentDataImport {
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
-		String startDate = new DateTime().minusDays(14).toString("yyyy-MM-dd");
+		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusDays(14)
+				.toString("yyyy-MM-dd");
 		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 
@@ -128,24 +132,15 @@ public class StudentDataImport {
 			result = githubApi.importGithubComments(startDate, eventList);
 
 			if (result) {
-				// Remove updated events from eventList before processing further
-				removeUpdatedGithubEvents(eventList);
-
-				if (eventList.size() > 0) {
-					// Import github comments for level 0 & 1
-					githubApi.importGithubCommentsByLevel(0, startDate, null, eventList);
-					removeUpdatedGithubEvents(eventList);
-
-					if (eventList.size() > 0) {
-						githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
-
-						// Update any remaining null comments to show event was processed
-						githubApi.updateEmptyGithubComments(eventList);
-					}
-				}
+				// Import github comments for level 0 & 1
+				githubApi.importGithubCommentsByLevel(0, startDate, null, eventList);
+				githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
 
 				// Updated github comments for users with new user name
 				githubApi.updateMissingGithubComments();
+
+				// Update any remaining null comments to show event was processed
+				githubApi.updateEmptyGithubComments(eventList);
 
 			} else {
 				sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
@@ -156,15 +151,6 @@ public class StudentDataImport {
 
 		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
-	}
-
-	private void removeUpdatedGithubEvents(ArrayList<AttendanceEventModel> eventList) {
-		for (int i = eventList.size() - 1; i >= 0; i--) {
-			AttendanceEventModel model = eventList.get(i);
-			if (!model.getGithubComments().equals("")) {
-				eventList.remove(model);
-			}
-		}
 	}
 
 	private String readFile(String filename) {
