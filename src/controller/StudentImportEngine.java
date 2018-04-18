@@ -13,10 +13,10 @@ import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
 
-public class ImportEngine {
+public class StudentImportEngine {
 	MySqlDatabase sqlDb;
 	
-	public ImportEngine (MySqlDatabase sqlDb) {
+	public StudentImportEngine (MySqlDatabase sqlDb) {
 		this.sqlDb = sqlDb;
 	}
 	

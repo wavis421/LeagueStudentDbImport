@@ -42,7 +42,7 @@ public class StudentDataImport {
 			System.exit(0);
 		}
 		
-		ImportEngine importer = new ImportEngine(sqlDb);
+		StudentImportEngine importer = new StudentImportEngine(sqlDb);
 
 		// Connect to Pike13 and import data
 		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
