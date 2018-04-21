@@ -109,5 +109,4 @@ public class StudentImportEngine {
 		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 	}
-
 }
