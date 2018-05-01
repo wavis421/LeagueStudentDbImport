@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
+import model.CoursesModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
@@ -15,11 +16,11 @@ import model.StudentNameModel;
 
 public class StudentImportEngine {
 	MySqlDatabase sqlDb;
-	
-	public StudentImportEngine (MySqlDatabase sqlDb) {
+
+	public StudentImportEngine(MySqlDatabase sqlDb) {
 		this.sqlDb = sqlDb;
 	}
-	
+
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd")
 				.substring(0, 10);
@@ -75,6 +76,24 @@ public class StudentImportEngine {
 
 		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
+	}
+
+	public void importCoursesFromPike13(Pike13Api pike13Api) {
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		String startDate = today.minusDays(14).toString("yyyy-MM-dd");
+		String endDate = today.plusDays(90).toString("yyyy-MM-dd");
+		sqlDb.insertLogData(LogDataModel.STARTING_COURSES_IMPORT, new StudentNameModel("", "", false), 0,
+				" from " + startDate + " to " + endDate + " ***");
+
+		// Get data from Pike13
+		ArrayList<CoursesModel> coursesList = pike13Api.getCourses(startDate, endDate);
+
+		// Update changes in database
+		if (coursesList.size() > 0)
+			sqlDb.importCourses(coursesList);
+
+		sqlDb.insertLogData(LogDataModel.COURSES_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+				" from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importGithubComments(String startDate, GithubApi githubApi) {

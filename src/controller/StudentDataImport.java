@@ -49,6 +49,7 @@ public class StudentDataImport {
 		importer.importStudentsFromPike13(pike13Api);
 		importer.importAttendanceFromPike13(startDateString, pike13Api);
 		importer.importScheduleFromPike13(pike13Api);
+		importer.importCoursesFromPike13(pike13Api);
 
 		// Connect to Github and import data
 		GithubApi githubApi = new GithubApi(sqlDb, githubToken);
