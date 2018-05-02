@@ -101,6 +101,9 @@ public class StudentImportEngine {
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 
+		// Update github comments for users with new user name
+		githubApi.updateMissingGithubComments();
+		
 		// Get list of events with missing comments
 		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, 0, false);
 		if (eventList.size() > 0) {
@@ -111,9 +114,6 @@ public class StudentImportEngine {
 				// Import github comments for level 0 & 1
 				githubApi.importGithubCommentsByLevel(0, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
-
-				// Updated github comments for users with new user name
-				githubApi.updateMissingGithubComments();
 
 				// Update any remaining null comments to show event was processed
 				githubApi.updateEmptyGithubComments(eventList);
