@@ -19,8 +19,9 @@ public class StudentDataImport {
 
 	public void importStudentTrackerData() {
 		// Import data starting 7 days ago
-		String startDateString = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusDays(7)
-				.toString().substring(0, 10);
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		String startDateString = today.minusDays(7).toString().substring(0, 10);
+		String courseEndDate = today.plusDays(120).toString().substring(0, 10);
 
 		// Retrieve tokens and passwords
 		Preferences prefs = Preferences.userRoot();
@@ -48,6 +49,7 @@ public class StudentDataImport {
 		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
 		importer.importStudentsFromPike13(pike13Api);
 		importer.importAttendanceFromPike13(startDateString, pike13Api);
+//		importer.importCourseAttendanceFromPike13(startDateString, courseEndDate, pike13Api);
 		importer.importScheduleFromPike13(pike13Api);
 		importer.importCoursesFromPike13(pike13Api);
 
