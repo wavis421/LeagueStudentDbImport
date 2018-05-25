@@ -15,6 +15,10 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class StudentImportEngine {
+	static final int SCHEDULE_DAYS_IN_PAST = 14;
+	static final int COURSE_DAYS_IN_PAST = 14;
+	static final int COURSE_DAYS_IN_FUTURE = 120;
+
 	MySqlDatabase sqlDb;
 
 	public StudentImportEngine(MySqlDatabase sqlDb) {
@@ -66,7 +70,7 @@ public class StudentImportEngine {
 		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 	}
-	
+
 	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13Api pike13Api) {
 		sqlDb.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
@@ -78,11 +82,13 @@ public class StudentImportEngine {
 		if (eventList.size() > 0) {
 			sqlDb.importAttendance(eventList);
 			for (AttendanceEventModel a : eventList) {
-				System.out.println(a.getStudentNameModel().toString() + ": " + a.getEventName() + ", " + a.getServiceDateString() + ", "
-						+ a.getServiceCategory() + ", " + a.getState() + ", " + a.getRepoName() + ", " + a.getGithubName() + ", " 
-						+ a.getGithubComments() + ", " + a.getTeacherNames() + ", " + a.getClientID());
+				System.out.println(a.getStudentNameModel().toString() + ": " + a.getEventName() + ", "
+						+ a.getServiceDateString() + ", " + a.getServiceCategory() + ", " + a.getState() + ", "
+						+ a.getRepoName() + ", " + a.getGithubName() + ", " + a.getGithubComments() + ", "
+						+ a.getTeacherNames() + ", " + a.getClientID());
 			}
-			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate + " to " + endDate);
+			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate
+					+ " to " + endDate);
 		}
 
 		sqlDb.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
@@ -90,8 +96,8 @@ public class StudentImportEngine {
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
-		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusDays(14)
-				.toString("yyyy-MM-dd");
+		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+				.minusDays(SCHEDULE_DAYS_IN_PAST).toString("yyyy-MM-dd");
 		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 
@@ -110,8 +116,8 @@ public class StudentImportEngine {
 
 	public void importCoursesFromPike13(Pike13Api pike13Api) {
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
-		String startDate = today.minusDays(14).toString("yyyy-MM-dd");
-		String endDate = today.plusDays(120).toString("yyyy-MM-dd");
+		String startDate = today.minusDays(COURSE_DAYS_IN_PAST).toString("yyyy-MM-dd");
+		String endDate = today.plusDays(COURSE_DAYS_IN_FUTURE).toString("yyyy-MM-dd");
 		sqlDb.insertLogData(LogDataModel.STARTING_COURSES_IMPORT, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
 
@@ -149,7 +155,7 @@ public class StudentImportEngine {
 
 				// Update any remaining null comments to show event was processed
 				githubApi.updateEmptyGithubComments(eventList);
-				
+
 				System.out.println(eventList.size() + " github records imported");
 
 			} else {
