@@ -81,12 +81,6 @@ public class StudentImportEngine {
 		// Update changes in database
 		if (eventList.size() > 0) {
 			sqlDb.importAttendance(eventList);
-			for (AttendanceEventModel a : eventList) {
-				System.out.println(a.getStudentNameModel().toString() + ": " + a.getEventName() + ", "
-						+ a.getServiceDateString() + ", " + a.getServiceCategory() + ", " + a.getState() + ", "
-						+ a.getRepoName() + ", " + a.getGithubName() + ", " + a.getGithubComments() + ", "
-						+ a.getTeacherNames() + ", " + a.getClientID());
-			}
 			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate
 					+ " to " + endDate);
 		}
