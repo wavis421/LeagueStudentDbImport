@@ -11,6 +11,8 @@ import org.joda.time.DateTimeZone;
 import model.MySqlDatabase;
 
 public class StudentDataImport {
+	private static final int ATTEND_NUM_DAYS_IN_PAST = 8;
+	private static final int ATTEND_NUM_DAYS_IN_FUTURE = 120;
 	private MySqlDatabase sqlDb;
 
 	public static void main(String[] args) {
@@ -20,8 +22,8 @@ public class StudentDataImport {
 	public void importStudentTrackerData() {
 		// Import data starting 7 days ago
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
-		String startDateString = today.minusDays(7).toString().substring(0, 10);
-		String courseEndDate = today.plusDays(120).toString().substring(0, 10);
+		String startDateString = today.minusDays(ATTEND_NUM_DAYS_IN_PAST).toString().substring(0, 10);
+		String courseEndDate = today.plusDays(ATTEND_NUM_DAYS_IN_FUTURE).toString().substring(0, 10);
 
 		// Retrieve tokens and passwords
 		Preferences prefs = Preferences.userRoot();
