@@ -143,7 +143,8 @@ public class StudentImportEngine {
 			result = githubApi.importGithubComments(startDate, eventList);
 
 			if (result) {
-				// Import github comments for level 0 & 1
+				// Import github comments for level 0 & 1, plus Intro to Jave (-1)
+				githubApi.importGithubCommentsByLevel(-1, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(0, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
 
