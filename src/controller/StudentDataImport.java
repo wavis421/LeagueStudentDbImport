@@ -8,6 +8,7 @@ import java.util.prefs.Preferences;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import model.LocationLookup;
 import model.MySqlDatabase;
 
 public class StudentDataImport {
@@ -44,8 +45,9 @@ public class StudentDataImport {
 			System.out.println("Failed to connect to MySql database");
 			System.exit(0);
 		}
-		
+
 		StudentImportEngine importer = new StudentImportEngine(sqlDb);
+		LocationLookup.setLocationData(sqlDb.getLocationList());
 
 		// Connect to Pike13 and import data
 		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
