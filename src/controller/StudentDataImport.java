@@ -11,7 +11,7 @@ import org.joda.time.DateTimeZone;
 import model.MySqlDatabase;
 
 public class StudentDataImport {
-	private static final int ATTEND_NUM_DAYS_IN_PAST = 8;
+	private static final int ATTEND_NUM_DAYS_IN_PAST = 21;
 	private static final int ATTEND_NUM_DAYS_IN_FUTURE = 120;
 	private MySqlDatabase sqlDb;
 
