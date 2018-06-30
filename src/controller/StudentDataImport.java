@@ -10,6 +10,8 @@ import org.joda.time.DateTimeZone;
 
 import model.LocationLookup;
 import model.MySqlDatabase;
+import model.MySqlDbImports;
+import model.MySqlDbLogging;
 
 public class StudentDataImport {
 	private static final int ATTEND_NUM_DAYS_IN_PAST = 21;
@@ -46,7 +48,9 @@ public class StudentDataImport {
 			System.exit(0);
 		}
 
-		StudentImportEngine importer = new StudentImportEngine(sqlDb);
+		new MySqlDbLogging(sqlDb);
+		MySqlDbImports sqlImportDb = new MySqlDbImports(sqlDb);
+		StudentImportEngine importer = new StudentImportEngine(sqlDb, sqlImportDb);
 		LocationLookup.setLocationData(sqlDb.getLocationList());
 
 		// Connect to Pike13 and import data

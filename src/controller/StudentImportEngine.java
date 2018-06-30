@@ -9,6 +9,8 @@ import model.AttendanceEventModel;
 import model.CoursesModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.MySqlDbImports;
+import model.MySqlDbLogging;
 import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
@@ -20,15 +22,17 @@ public class StudentImportEngine {
 	static final int COURSE_DAYS_IN_FUTURE = 120;
 
 	MySqlDatabase sqlDb;
+	MySqlDbImports sqlImportDb;
 
-	public StudentImportEngine(MySqlDatabase sqlDb) {
+	public StudentImportEngine(MySqlDatabase sqlDb, MySqlDbImports sqlImportDb) {
 		this.sqlDb = sqlDb;
+		this.sqlImportDb = sqlImportDb;
 	}
 
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd")
 				.substring(0, 10);
-		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 
 		// Get data from Pike13
@@ -36,16 +40,16 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (studentList.size() > 0) {
-			sqlDb.importStudents(studentList);
+			sqlImportDb.importStudents(studentList);
 			System.out.println(studentList.size() + " students imported from Pike13");
 		}
 
-		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 	}
 
 	public void importAttendanceFromPike13(String startDate, Pike13Api pike13Api) {
-		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 
 		// Get attendance data from Pike13 for all students
@@ -53,7 +57,7 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (eventList.size() > 0) {
-			sqlDb.importAttendance(eventList);
+			sqlImportDb.importAttendance(eventList);
 			System.out.println(eventList.size() + " attendance records imported from Pike13");
 		}
 
@@ -62,17 +66,17 @@ public class StudentImportEngine {
 		if (newStudents.size() > 0) {
 			eventList = pike13Api.getMissingAttendance(startDate, newStudents);
 			if (eventList.size() > 0) {
-				sqlDb.importAttendance(eventList);
+				sqlImportDb.importAttendance(eventList);
 				System.out.println(eventList.size() + " new student attendance records imported from Pike13");
 			}
 		}
 
-		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 	}
 
 	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13Api pike13Api) {
-		sqlDb.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
 
 		// Get course attendance data from Pike13 for all students
@@ -80,19 +84,19 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (eventList.size() > 0) {
-			sqlDb.importAttendance(eventList);
+			sqlImportDb.importAttendance(eventList);
 			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate
 					+ " to " + endDate);
 		}
 
-		sqlDb.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
 		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 				.minusDays(SCHEDULE_DAYS_IN_PAST).toString("yyyy-MM-dd");
-		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 
 		// Get data from Pike13
@@ -100,11 +104,11 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (scheduleList.size() > 0) {
-			sqlDb.importSchedule(scheduleList);
+			sqlImportDb.importSchedule(scheduleList);
 			System.out.println(scheduleList.size() + " schedule records imported from Pike13");
 		}
 
-		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
 	}
 
@@ -112,7 +116,7 @@ public class StudentImportEngine {
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		String startDate = today.minusDays(COURSE_DAYS_IN_PAST).toString("yyyy-MM-dd");
 		String endDate = today.plusDays(COURSE_DAYS_IN_FUTURE).toString("yyyy-MM-dd");
-		sqlDb.insertLogData(LogDataModel.STARTING_COURSES_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSES_IMPORT, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
 
 		// Get data from Pike13
@@ -120,17 +124,17 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (coursesList.size() > 0) {
-			sqlDb.importCourses(coursesList);
+			sqlImportDb.importCourses(coursesList);
 			System.out.println(coursesList.size() + " course records imported from Pike13");
 		}
 
-		sqlDb.insertLogData(LogDataModel.COURSES_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.COURSES_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importGithubComments(String startDate, GithubApi githubApi) {
 		boolean result;
-		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 
 		// Update github comments for users with new user name
@@ -154,13 +158,13 @@ public class StudentImportEngine {
 				System.out.println(eventList.size() + " github records imported");
 
 			} else {
-				sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+				MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 						": Github API rate limit exceeded ***");
 				return;
 			}
 		}
 
-		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+		MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate + " ***");
 	}
 }
