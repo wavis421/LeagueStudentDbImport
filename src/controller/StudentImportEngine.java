@@ -1,6 +1,7 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -37,6 +38,7 @@ public class StudentImportEngine {
 
 		// Get data from Pike13
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
+		Collections.sort(studentList);
 
 		// Update changes in database
 		if (studentList.size() > 0) {
