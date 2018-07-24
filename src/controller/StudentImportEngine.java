@@ -78,8 +78,8 @@ public class StudentImportEngine {
 	}
 
 	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13Api pike13Api) {
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
-				" from " + startDate + " to " + endDate + " ***");
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT,
+				new StudentNameModel("", "", false), 0, " from " + startDate + " to " + endDate + " ***");
 
 		// Get course attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getCourseAttendance(startDate, endDate);
@@ -91,8 +91,8 @@ public class StudentImportEngine {
 					+ " to " + endDate);
 		}
 
-		MySqlDbLogging.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" from " + startDate + " to " + endDate + " ***");
+		MySqlDbLogging.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE,
+				new StudentNameModel("", "", false), 0, " from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
