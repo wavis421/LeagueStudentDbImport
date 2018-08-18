@@ -59,7 +59,9 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (eventList.size() > 0) {
+			// Import attendance and then re-sort attendance list
 			sqlImportDb.importAttendance(eventList);
+			sqlImportDb.createSortedAttendanceList();
 			System.out.println(eventList.size() + " attendance records imported from Pike13");
 		}
 
