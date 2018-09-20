@@ -157,6 +157,7 @@ public class StudentImportEngine {
 				githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(2, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(3, startDate, null, eventList);
+				githubApi.importGithubCommentsByLevel(4,  startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(5, startDate, null, eventList);
 
 				// Update any remaining null comments to show event was processed
