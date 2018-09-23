@@ -60,7 +60,7 @@ public class StudentImportEngine {
 		// Update changes in database
 		if (eventList.size() > 0) {
 			// Import attendance and then re-sort attendance list
-			sqlImportDb.importAttendance(eventList);
+			sqlImportDb.importAttendance(startDate, eventList);
 			sqlImportDb.createSortedAttendanceList();
 			System.out.println(eventList.size() + " attendance records imported from Pike13");
 		}
@@ -70,7 +70,7 @@ public class StudentImportEngine {
 		if (newStudents.size() > 0) {
 			eventList = pike13Api.getMissingAttendance(startDate, newStudents);
 			if (eventList.size() > 0) {
-				sqlImportDb.importAttendance(eventList);
+				sqlImportDb.importAttendance(null, eventList);
 				System.out.println(eventList.size() + " new student attendance records imported from Pike13");
 			}
 		}
@@ -88,7 +88,7 @@ public class StudentImportEngine {
 
 		// Update changes in database
 		if (eventList.size() > 0) {
-			sqlImportDb.importAttendance(eventList);
+			sqlImportDb.importAttendance(null, eventList);
 			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate
 					+ " to " + endDate);
 		}
