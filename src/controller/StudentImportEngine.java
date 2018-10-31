@@ -36,8 +36,9 @@ public class StudentImportEngine {
 		MySqlDbLogging.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
 				" for " + today + " ***");
 
-		// Get data from Pike13
+		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
+		pike13Api.updateStudentTAData(studentList);
 		Collections.sort(studentList);
 
 		// Update changes in database
