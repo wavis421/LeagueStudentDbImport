@@ -39,6 +39,7 @@ public class StudentImportEngine {
 		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
 		pike13Api.updateStudentTAData(studentList);
+		sqlImportDb.updateMissingCurrentClass();
 		Collections.sort(studentList);
 
 		// Update changes in database
