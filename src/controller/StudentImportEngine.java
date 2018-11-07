@@ -106,15 +106,65 @@ public class StudentImportEngine {
 
 		// Get data from Pike13
 		ArrayList<ScheduleModel> scheduleList = pike13Api.getSchedule(startDate);
+		ArrayList<ScheduleModel> filteredList = new ArrayList<ScheduleModel>();
+
+		// Pike13 will have duplicate Schedule ID's, so filter them out
+		ScheduleModel lastUpdate = null;
+		for (ScheduleModel item : scheduleList) {
+			if (lastUpdate != null && item.compareTo(lastUpdate) == 0)
+				continue;
+
+			filteredList.add(item);
+			lastUpdate = item;
+		}
+
+		// Update student age fields and count
+		updateScheduleData(filteredList);
 
 		// Update changes in database
-		if (scheduleList.size() > 0) {
-			sqlImportDb.importSchedule(scheduleList);
-			System.out.println(scheduleList.size() + " schedule records imported from Pike13");
+		if (filteredList.size() > 0) {
+			sqlImportDb.importSchedule(filteredList);
+			System.out.println(filteredList.size() + " schedule records imported from Pike13");
 		}
 
 		MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" as of " + startDate.substring(0, 10) + " ***");
+	}
+
+	private void updateScheduleData(ArrayList<ScheduleModel> schedule) {
+		// Update the age fields and the attendance count for each class in schedule
+		ArrayList<StudentModel> students = sqlDb.getActiveStudents();
+
+		for (ScheduleModel sched : schedule) {
+			String className = sched.getClassName();
+			int attCount = 0;
+			Double ageMin = 0.0, ageMax = 0.0, ageAvg = 0.0, ageTot = 0.0;
+
+			for (StudentModel stud : students) {
+				// Update for each student in this class
+				if (className.equals(stud.getCurrentClass())) {
+					attCount++;
+					if (stud.getAge() > 0) {
+						ageTot += stud.getAge();
+						if (ageMin == 0 || stud.getAge() < ageMin)
+							ageMin = stud.getAge();
+						if (stud.getAge() > ageMax)
+							ageMax = stud.getAge();
+					} else {
+						System.out.println("Missing age field for " + stud.getFirstName() + " " + stud.getLastName()
+								+ ", " + className + " at " + sched.getStartTimeFormatted());
+					}
+				}
+			}
+			// Update the fields for this scheduled class
+			if (attCount > 0) {
+				ageAvg = ageTot / attCount;
+				sched.setMiscSchedFields(attCount, ageMin.toString().substring(0, 4), ageMax.toString().substring(0, 4),
+						ageAvg.toString().substring(0, 4));
+			} else {
+				sched.setMiscSchedFields(0, "", "", "");
+			}
+		}
 	}
 
 	public void importCoursesFromPike13(Pike13Api pike13Api) {
@@ -158,7 +208,7 @@ public class StudentImportEngine {
 				githubApi.importGithubCommentsByLevel(1, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(2, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(3, startDate, null, eventList);
-				githubApi.importGithubCommentsByLevel(4,  startDate, null, eventList);
+				githubApi.importGithubCommentsByLevel(4, startDate, null, eventList);
 				githubApi.importGithubCommentsByLevel(5, startDate, null, eventList);
 
 				// Update any remaining null comments to show event was processed
