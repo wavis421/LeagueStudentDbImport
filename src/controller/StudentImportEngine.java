@@ -137,7 +137,7 @@ public class StudentImportEngine {
 
 		for (ScheduleModel sched : schedule) {
 			String className = sched.getClassName();
-			int attCount = 0;
+			int attCount = 0, ageCount = 0;
 			Double ageMin = 0.0, ageMax = 0.0, ageAvg = 0.0, ageTot = 0.0;
 
 			for (StudentModel stud : students) {
@@ -145,6 +145,7 @@ public class StudentImportEngine {
 				if (className.equals(stud.getCurrentClass())) {
 					attCount++;
 					if (stud.getAge() > 0) {
+						ageCount++;
 						ageTot += stud.getAge();
 						if (ageMin == 0 || stud.getAge() < ageMin)
 							ageMin = stud.getAge();
@@ -157,8 +158,8 @@ public class StudentImportEngine {
 				}
 			}
 			// Update the fields for this scheduled class
-			if (attCount > 0) {
-				ageAvg = ageTot / attCount;
+			if (ageCount > 0) {
+				ageAvg = ageTot / ageCount;
 				sched.setMiscSchedFields(attCount, ageMin.toString().substring(0, 4), ageMax.toString().substring(0, 4),
 						ageAvg.toString().substring(0, 4));
 			} else {
