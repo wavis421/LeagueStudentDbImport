@@ -140,6 +140,7 @@ public class StudentImportEngine {
 			String className = sched.getClassName();
 			int attCount = 0, ageCount = 0;
 			Double ageMin = 0.0, ageMax = 0.0, ageAvg = 0.0, ageTot = 0.0;
+			int[] moduleCnt = new int[10]; // Curr count for modules 0-9
 
 			for (StudentModel stud : students) {
 				// Update for each student in this class
@@ -152,6 +153,9 @@ public class StudentImportEngine {
 							ageMin = stud.getAge();
 						if (stud.getAge() > ageMax)
 							ageMax = stud.getAge();
+						if (stud.getCurrentModule() != null)
+							moduleCnt[stud.getCurrentModule().charAt(0) - '0']++;
+						
 					} else {
 						System.out.println("Missing age field for " + stud.getFirstName() + " " + stud.getLastName()
 								+ ", " + className + " at " + sched.getStartTimeFormatted());
@@ -160,11 +164,19 @@ public class StudentImportEngine {
 			}
 			// Update the fields for this scheduled class
 			if (ageCount > 0) {
+				String moduleString = "";
+				for (int i = 0; i < moduleCnt.length; i++) {
+					if (moduleCnt[i] > 0) {
+						if (!moduleString.equals(""))
+							moduleString += ", ";
+						moduleString += moduleCnt[i] + "@Mod" + i;
+					}
+				}
 				ageAvg = ageTot / ageCount;
 				sched.setMiscSchedFields(attCount, ageMin.toString().substring(0, 4), ageMax.toString().substring(0, 4),
-						ageAvg.toString().substring(0, 4));
+						ageAvg.toString().substring(0, 4), moduleString);
 			} else {
-				sched.setMiscSchedFields(0, "", "", "");
+				sched.setMiscSchedFields(0, "", "", "", "");
 			}
 		}
 	}
