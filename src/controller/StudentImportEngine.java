@@ -166,13 +166,17 @@ public class StudentImportEngine {
 			// Update the fields for this scheduled class
 			if (ageCount > 0) {
 				String moduleString = "";
+				int recordCnt = attCount;
 				for (int i = 0; i < moduleCnt.length; i++) {
 					if (moduleCnt[i] > 0) {
+						recordCnt -= moduleCnt[i];
 						if (!moduleString.equals(""))
 							moduleString += ", ";
 						moduleString += moduleCnt[i] + "@Mod" + i;
 					}
 				}
+				if (recordCnt > 0 && !moduleString.equals(""))
+					moduleString += ", " + recordCnt + "@?";
 				ageAvg = ageTot / ageCount;
 				sched.setMiscSchedFields(attCount, ageMin.toString().substring(0, 4), ageMax.toString().substring(0, 4),
 						ageAvg.toString().substring(0, 4), moduleString);
