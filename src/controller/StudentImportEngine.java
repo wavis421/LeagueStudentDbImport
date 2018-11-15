@@ -33,8 +33,6 @@ public class StudentImportEngine {
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd")
 				.substring(0, 10);
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
-				" for " + today + " ***");
 
 		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
@@ -47,15 +45,9 @@ public class StudentImportEngine {
 			sqlImportDb.importStudents(studentList);
 			System.out.println(studentList.size() + " students imported from Pike13");
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" for " + today + " ***");
 	}
 
 	public void importAttendanceFromPike13(String startDate, Pike13Api pike13Api) {
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
-				" starting from " + startDate + " ***");
-
 		// Get attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getAttendance(startDate);
 
@@ -76,15 +68,9 @@ public class StudentImportEngine {
 				System.out.println(eventList.size() + " new student attendance records imported from Pike13");
 			}
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" starting from " + startDate + " ***");
 	}
 
 	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13Api pike13Api) {
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSE_ATTENDANCE_IMPORT,
-				new StudentNameModel("", "", false), 0, " from " + startDate + " to " + endDate + " ***");
-
 		// Get course attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getCourseAttendance(startDate, endDate);
 
@@ -94,16 +80,11 @@ public class StudentImportEngine {
 			System.out.println(eventList.size() + " course attendance records imported from Pike13, " + startDate
 					+ " to " + endDate);
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.COURSE_ATTENDANCE_IMPORT_COMPLETE,
-				new StudentNameModel("", "", false), 0, " from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importScheduleFromPike13(Pike13Api pike13Api) {
 		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 				.minusDays(SCHEDULE_DAYS_IN_PAST).toString("yyyy-MM-dd");
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
-				" as of " + startDate.substring(0, 10) + " ***");
 
 		// Get data from Pike13
 		ArrayList<ScheduleModel> scheduleList = pike13Api.getSchedule(startDate);
@@ -127,9 +108,6 @@ public class StudentImportEngine {
 			sqlImportDb.importSchedule(filteredList);
 			System.out.println(filteredList.size() + " schedule records imported from Pike13");
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" as of " + startDate.substring(0, 10) + " ***");
 	}
 
 	private void updateScheduleData(ArrayList<ScheduleModel> schedule) {
@@ -190,8 +168,6 @@ public class StudentImportEngine {
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		String startDate = today.minusDays(COURSE_DAYS_IN_PAST).toString("yyyy-MM-dd");
 		String endDate = today.plusDays(COURSE_DAYS_IN_FUTURE).toString("yyyy-MM-dd");
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_COURSES_IMPORT, new StudentNameModel("", "", false), 0,
-				" from " + startDate + " to " + endDate + " ***");
 
 		// Get data from Pike13
 		ArrayList<CoursesModel> coursesList = pike13Api.getCourses(startDate, endDate);
@@ -201,15 +177,10 @@ public class StudentImportEngine {
 			sqlImportDb.importCourses(coursesList);
 			System.out.println(coursesList.size() + " course records imported from Pike13");
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.COURSES_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" from " + startDate + " to " + endDate + " ***");
 	}
 
 	public void importGithubComments(String startDate, GithubApi githubApi) {
 		boolean result;
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
-				" starting from " + startDate + " ***");
 
 		// Update github comments for users with new user name
 		githubApi.updateMissingGithubComments();
@@ -241,8 +212,5 @@ public class StudentImportEngine {
 				return;
 			}
 		}
-
-		MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
-				" starting from " + startDate + " ***");
 	}
 }

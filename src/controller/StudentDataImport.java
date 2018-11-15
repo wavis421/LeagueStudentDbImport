@@ -9,9 +9,11 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import model.LocationLookup;
+import model.LogDataModel;
 import model.MySqlDatabase;
 import model.MySqlDbImports;
 import model.MySqlDbLogging;
+import model.StudentNameModel;
 
 public class StudentDataImport {
 	private static final int ATTEND_NUM_DAYS_IN_PAST = 21;
@@ -49,6 +51,9 @@ public class StudentDataImport {
 		}
 
 		new MySqlDbLogging(sqlDb);
+		MySqlDbLogging.insertLogData(LogDataModel.STARTING_TRACKER_IMPORT, new StudentNameModel("", "", false), 0,
+				" for " + today.toString("yyyy-MM-dd") + " ***");
+
 		MySqlDbImports sqlImportDb = new MySqlDbImports(sqlDb);
 		StudentImportEngine importer = new StudentImportEngine(sqlDb, sqlImportDb);
 		LocationLookup.setLocationData(sqlDb.getLocationList());
@@ -65,6 +70,9 @@ public class StudentDataImport {
 		GithubApi githubApi = new GithubApi(sqlDb, githubToken);
 		importer.importGithubComments(startDateString, githubApi);
 
+		MySqlDbLogging.insertLogData(LogDataModel.TRACKER_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+				" for " + today.toString("yyyy-MM-dd") + " ***");
+		
 		sqlDb.disconnectDatabase();
 		System.exit(0);
 	}
