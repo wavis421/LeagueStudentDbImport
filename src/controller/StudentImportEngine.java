@@ -153,7 +153,8 @@ public class StudentImportEngine {
 							ageMin = stud.getAge();
 						if (stud.getAge() > ageMax)
 							ageMax = stud.getAge();
-						if (stud.getCurrentModule() != null)
+						if (stud.getCurrentModule() != null && !stud.getCurrentModule().equals("")
+								&& stud.getCurrentModule().charAt(0) >= '0' && stud.getCurrentModule().charAt(0) <= '9')
 							moduleCnt[stud.getCurrentModule().charAt(0) - '0']++;
 						
 					} else {
