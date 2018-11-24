@@ -134,10 +134,6 @@ public class StudentImportEngine {
 						if (stud.getCurrentModule() != null && !stud.getCurrentModule().equals("")
 								&& stud.getCurrentModule().charAt(0) >= '0' && stud.getCurrentModule().charAt(0) <= '9')
 							moduleCnt[stud.getCurrentModule().charAt(0) - '0']++;
-						
-					} else {
-						System.out.println("Missing age field for " + stud.getFirstName() + " " + stud.getLastName()
-								+ ", " + className + " at " + sched.getStartTimeFormatted());
 					}
 				}
 			}
