@@ -31,9 +31,6 @@ public class StudentImportEngine {
 	}
 
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
-		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd")
-				.substring(0, 10);
-
 		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
 		pike13Api.updateStudentTAData(studentList);
