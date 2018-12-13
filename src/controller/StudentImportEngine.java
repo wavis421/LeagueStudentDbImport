@@ -38,6 +38,7 @@ public class StudentImportEngine {
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
 		pike13Api.updateStudentTAData(studentList);
 		sqlImportDb.updateMissingCurrentClass();
+		sqlImportDb.updateRegisteredClass();
 		Collections.sort(studentList);
 
 		// Update changes in database
@@ -122,7 +123,7 @@ public class StudentImportEngine {
 
 			for (StudentModel stud : students) {
 				// Update for each student in this class
-				if (className.equals(stud.getCurrentClass())) {
+				if (className.equals(stud.getCurrentClass()) || className.equals(stud.getRegisterClass())) {
 					attCount++;
 					if (stud.getAge() > 0) {
 						ageCount++;
