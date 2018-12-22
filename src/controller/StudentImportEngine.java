@@ -30,6 +30,10 @@ public class StudentImportEngine {
 		this.sqlImportDb = sqlImportDb;
 	}
 
+	public void removeOldLogData(int numDays) {
+		MySqlDbLogging.removeOldLogData(numDays);
+	}
+
 	public void importStudentsFromPike13(Pike13Api pike13Api) {
 		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();

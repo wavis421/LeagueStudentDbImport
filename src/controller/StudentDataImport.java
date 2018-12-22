@@ -15,6 +15,14 @@ import model.MySqlDbImports;
 import model.MySqlDbLogging;
 import model.StudentNameModel;
 
+/**
+ * The Student Data Import class is the controller for the nightly import of
+ * data from Pike13 to The League AWS Tracker Database. Imported data includes
+ * Student data, Attendance data and class/course Schedule data.
+ * 
+ * @author wavis
+ *
+ */
 public class StudentDataImport {
 	private static final int ATTEND_NUM_DAYS_IN_PAST = 21;
 	private static final int ATTEND_NUM_DAYS_IN_FUTURE = 120;
@@ -58,6 +66,9 @@ public class StudentDataImport {
 		StudentImportEngine importer = new StudentImportEngine(sqlDb, sqlImportDb);
 		LocationLookup.setLocationData(sqlDb.getLocationList());
 
+		// Remove log data older than 7 days
+		importer.removeOldLogData(7);
+
 		// Connect to Pike13 and import data
 		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
 		importer.importStudentsFromPike13(pike13Api);
@@ -72,7 +83,7 @@ public class StudentDataImport {
 
 		MySqlDbLogging.insertLogData(LogDataModel.TRACKER_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" for " + today.toString("yyyy-MM-dd") + " ***");
-		
+
 		sqlDb.disconnectDatabase();
 		System.exit(0);
 	}
