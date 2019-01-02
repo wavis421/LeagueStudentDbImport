@@ -9,7 +9,6 @@ import org.joda.time.DateTimeZone;
 import model.AttendanceEventModel;
 import model.CoursesModel;
 import model.LogDataModel;
-import model.MySqlDatabase;
 import model.MySqlDbImports;
 import model.MySqlDbLogging;
 import model.ScheduleModel;
@@ -22,11 +21,9 @@ public class StudentImportEngine {
 	static final int COURSE_DAYS_IN_PAST = 14;
 	static final int COURSE_DAYS_IN_FUTURE = 120;
 
-	MySqlDatabase sqlDb;
 	MySqlDbImports sqlImportDb;
 
-	public StudentImportEngine(MySqlDatabase sqlDb, MySqlDbImports sqlImportDb) {
-		this.sqlDb = sqlDb;
+	public StudentImportEngine(MySqlDbImports sqlImportDb) {
 		this.sqlImportDb = sqlImportDb;
 	}
 
@@ -34,7 +31,7 @@ public class StudentImportEngine {
 		MySqlDbLogging.removeOldLogData(numDays);
 	}
 
-	public void importStudentsFromPike13(Pike13Api pike13Api) {
+	public void importStudentsFromPike13(Pike13DbImport pike13Api) {
 		// Get data from Pike13, then update student TA data from Staff DB
 		ArrayList<StudentImportModel> studentList = pike13Api.getClients();
 		pike13Api.updateStudentTAData(studentList);
@@ -49,7 +46,7 @@ public class StudentImportEngine {
 		}
 	}
 
-	public void importAttendanceFromPike13(String startDate, Pike13Api pike13Api) {
+	public void importAttendanceFromPike13(String startDate, Pike13DbImport pike13Api) {
 		// Get attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getAttendance(startDate);
 
@@ -62,7 +59,7 @@ public class StudentImportEngine {
 		}
 
 		// Get 'missing' attendance for new and returned students
-		ArrayList<StudentModel> newStudents = sqlDb.getStudentsUsingFlag("NewStudent");
+		ArrayList<StudentModel> newStudents = sqlImportDb.getStudentsUsingFlag("NewStudent");
 		if (newStudents.size() > 0) {
 			eventList = pike13Api.getMissingAttendance(startDate, newStudents);
 			if (eventList.size() > 0) {
@@ -72,7 +69,7 @@ public class StudentImportEngine {
 		}
 	}
 
-	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13Api pike13Api) {
+	public void importCourseAttendanceFromPike13(String startDate, String endDate, Pike13DbImport pike13Api) {
 		// Get course attendance data from Pike13 for all students
 		ArrayList<AttendanceEventModel> eventList = pike13Api.getCourseAttendance(startDate, endDate);
 
@@ -84,7 +81,7 @@ public class StudentImportEngine {
 		}
 	}
 
-	public void importScheduleFromPike13(Pike13Api pike13Api) {
+	public void importScheduleFromPike13(Pike13DbImport pike13Api) {
 		String startDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 				.minusDays(SCHEDULE_DAYS_IN_PAST).toString("yyyy-MM-dd");
 
@@ -114,7 +111,7 @@ public class StudentImportEngine {
 
 	private void updateScheduleData(ArrayList<ScheduleModel> schedule) {
 		// Update the age fields and the attendance count for each class in schedule
-		ArrayList<StudentModel> students = sqlDb.getActiveStudents();
+		ArrayList<StudentModel> students = sqlImportDb.getActiveStudents();
 
 		for (ScheduleModel sched : schedule) {
 			String className = sched.getClassName();
@@ -162,7 +159,7 @@ public class StudentImportEngine {
 		}
 	}
 
-	public void importCoursesFromPike13(Pike13Api pike13Api) {
+	public void importCoursesFromPike13(Pike13DbImport pike13Api) {
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		String startDate = today.minusDays(COURSE_DAYS_IN_PAST).toString("yyyy-MM-dd");
 		String endDate = today.plusDays(COURSE_DAYS_IN_FUTURE).toString("yyyy-MM-dd");
@@ -184,7 +181,7 @@ public class StudentImportEngine {
 		githubApi.updateMissingGithubComments();
 
 		// Get list of events with missing comments
-		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, 0, false);
+		ArrayList<AttendanceEventModel> eventList = sqlImportDb.getEventsWithNoComments(startDate, 0, false);
 		if (eventList.size() > 0) {
 			// Import Github comments
 			result = githubApi.importGithubComments(startDate, eventList);

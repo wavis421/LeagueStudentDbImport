@@ -63,14 +63,15 @@ public class StudentDataImport {
 				" for " + today.toString("yyyy-MM-dd") + " ***");
 
 		MySqlDbImports sqlImportDb = new MySqlDbImports(sqlDb);
-		StudentImportEngine importer = new StudentImportEngine(sqlDb, sqlImportDb);
+		StudentImportEngine importer = new StudentImportEngine(sqlImportDb);
 		LocationLookup.setLocationData(sqlDb.getLocationList());
 
 		// Remove log data older than 7 days
 		importer.removeOldLogData(7);
 
 		// Connect to Pike13 and import data
-		Pike13Api pike13Api = new Pike13Api(sqlDb, pike13Token);
+		Pike13Connect pike13Conn = new Pike13Connect(pike13Token);
+		Pike13DbImport pike13Api = new Pike13DbImport(sqlImportDb, pike13Conn);
 		importer.importStudentsFromPike13(pike13Api);
 		importer.importAttendanceFromPike13(startDateString, pike13Api);
 		importer.importScheduleFromPike13(pike13Api);
@@ -78,7 +79,7 @@ public class StudentDataImport {
 		importer.importCourseAttendanceFromPike13(startDateString, courseEndDate, pike13Api);
 
 		// Connect to Github and import data
-		GithubApi githubApi = new GithubApi(sqlDb, githubToken);
+		GithubApi githubApi = new GithubApi(sqlImportDb, githubToken);
 		importer.importGithubComments(startDateString, githubApi);
 
 		MySqlDbLogging.insertLogData(LogDataModel.TRACKER_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
