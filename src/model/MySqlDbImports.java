@@ -1269,8 +1269,7 @@ public class MySqlDbImports {
 
 			if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
 					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " ")) {
-				// New graduate: If score is just 'Ln ' or student promoted or skipped, then no
-				// score
+				// New graduate: If score is just 'Ln ' or student promoted or skipped, then no score
 				if (!isPromoted && !isSkip && importStudent.getLastExamScore().length() > 3)
 					score = importStudent.getLastExamScore().substring(3);
 
@@ -1295,6 +1294,16 @@ public class MySqlDbImports {
 					getStartDateByClientIdAndLevel(dbStudent.getClientID(), dbCurrLevelNum),
 					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), false,
 					false, isSkip, isPromoted));
+			
+		} else if (dbStudent.getCurrLevel().equals("") && importStudent.getLastExamScore().toLowerCase().contains("skip")
+				&& importStudent.getLastExamScore().charAt(0) == 'L' && importStudent.getLastExamScore().charAt(2) == ' ') {
+			// Student's current level is blank but student skipped level(s)
+			int currLevel = Integer.parseInt(importStudent.getCurrLevel());
+			String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd");
+			
+			for (int i = 0; i < currLevel; i++)
+				addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(), i,
+						"", dbStudent.getCurrClass(), today, today, false, false, true, false));
 		}
 	}
 
