@@ -59,8 +59,8 @@ public class StudentDataImport {
 		}
 
 		new MySqlDbLogging(sqlDb);
-		MySqlDbLogging.insertLogData(LogDataModel.STARTING_TRACKER_IMPORT, new StudentNameModel("", "", false), 0,
-				" for " + today.toString("yyyy-MM-dd") + " ***");
+		//MySqlDbLogging.insertLogData(LogDataModel.STARTING_TRACKER_IMPORT, new StudentNameModel("", "", false), 0,
+		//		" for " + today.toString("yyyy-MM-dd") + " ***");
 
 		MySqlDbImports sqlImportDb = new MySqlDbImports(sqlDb);
 		StudentImportEngine importer = new StudentImportEngine(sqlImportDb);
