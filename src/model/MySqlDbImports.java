@@ -1266,8 +1266,14 @@ public class MySqlDbImports {
 
 			// Record is out-of-date (attendance never updated!), or teacher, so remove
 			if (commitDate.compareTo(startDate) < 0 || gitUser.equals("wavis421") || gitUser.equals("keithagroves")
-					|| gitUser.equals("davedleague") || gitUser.equals("jaleague") || gitUser.equals("sebastiantroncoso93")
-					|| gitUser.equals("dencee") || gitUser.equals("mjfre") || gitUser.equals("awasicek")) 
+					|| gitUser.equals("davedleague") || gitUser.equals("sebastiantroncoso93")
+					|| gitUser.equals("codybsauer") || gitUser.equals("shacheeparikh")
+					|| gitUser.equals("mwoguri")      // Michiyo
+					|| gitUser.equals("jaleague")     // Jackie
+					|| gitUser.equals("zaelix")       // Mike
+					|| gitUser.equals("dencee")       // Daniel
+					|| gitUser.equals("mjfre")        // Matt
+					|| gitUser.equals("awasicek"))    // Andrew 
 			{
 				deletePendingGithubEvent(pendingGit.getPrimaryID());
 				githubList.remove(i);
@@ -2225,6 +2231,7 @@ public class MySqlDbImports {
 						// Continue to compare until dbList catches up
 						compare = dbList.get(dbListIdx).compareTo(importEvent);
 				}
+
 				// One final check to get in sync with importEvent
 				if (compare == 0) {
 					// Match, so continue incrementing through list
