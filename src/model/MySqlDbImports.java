@@ -277,9 +277,9 @@ public class MySqlDbImports {
 				addStudentStmt.setString(col++, student.getEmail());
 				addStudentStmt.setString(col++, student.getEmergContactEmail());
 				addStudentStmt.setString(col++, student.getAccountMgrEmails());
-				addStudentStmt.setString(col++, student.getMobilePhone());
+				addStudentStmt.setString(col++, student.getPhone1());
 				addStudentStmt.setString(col++, student.getAccountMgrPhones());
-				addStudentStmt.setString(col++, student.getHomePhone());
+				addStudentStmt.setString(col++, student.getPhone2());
 				addStudentStmt.setString(col++, student.getEmergContactPhone());
 				addStudentStmt.setString(col++, student.getBirthDate());
 				addStudentStmt.setString(col++, student.getStaffSinceDate());
@@ -364,9 +364,9 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getEmail());
 				updateStudentStmt.setString(col++, importStudent.getEmergContactEmail());
 				updateStudentStmt.setString(col++, importStudent.getAccountMgrEmails());
-				updateStudentStmt.setString(col++, importStudent.getMobilePhone());
+				updateStudentStmt.setString(col++, importStudent.getPhone1());
 				updateStudentStmt.setString(col++, importStudent.getAccountMgrPhones());
-				updateStudentStmt.setString(col++, importStudent.getHomePhone());
+				updateStudentStmt.setString(col++, importStudent.getPhone2());
 				updateStudentStmt.setString(col++, importStudent.getEmergContactPhone());
 				updateStudentStmt.setString(col++, importStudent.getBirthDate());
 				updateStudentStmt.setString(col++, importStudent.getStaffSinceDate());
@@ -448,7 +448,7 @@ public class MySqlDbImports {
 			else
 				changes += ", Start Date";
 		}
-		if (!importStudent.getMobilePhone().equals(dbStudent.getMobilePhone())) {
+		if (!importStudent.getPhone1().equals(dbStudent.getPhone1())) {
 			if (changes.equals(""))
 				changes += " (Mobile phone";
 			else
@@ -460,7 +460,7 @@ public class MySqlDbImports {
 			else
 				changes += ", Acct mgr phone";
 		}
-		if (!importStudent.getHomePhone().equals(dbStudent.getHomePhone())) {
+		if (!importStudent.getPhone2().equals(dbStudent.getPhone2())) {
 			if (changes.equals(""))
 				changes += " (Home phone";
 			else
@@ -2231,7 +2231,6 @@ public class MySqlDbImports {
 						// Continue to compare until dbList catches up
 						compare = dbList.get(dbListIdx).compareTo(importEvent);
 				}
-
 				// One final check to get in sync with importEvent
 				if (compare == 0) {
 					// Match, so continue incrementing through list
