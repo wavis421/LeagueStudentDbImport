@@ -1375,14 +1375,13 @@ public class MySqlDbImports {
 	private int updateAttendanceState(AttendanceEventModel importEvent, AttendanceEventModel dbAttendance,
 			String teachers, StudentModel student) {
 		// When transitioning to completed, update current level for students <= L8.
-		// Only set level for old levels 0-8, AD/AG/PG, Slams & Make-ups.
+		// Only set level for Slams & Make-ups.
 		boolean addLevel = false;
 		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd");
 
 		if ((dbAttendance == null || !dbAttendance.getState().equals("completed"))
 				&& importEvent.getState().equals("completed") && importEvent.getServiceDateString().compareTo(today) <= 0
-				&& (importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
-						|| importEvent.getEventName().startsWith("PG") || importEvent.getEventName().startsWith("Java@")
+				&& (importEvent.getEventName().startsWith("Java@")
 						|| (importEvent.getServiceCategory().startsWith("class ")
 								&& !student.getCurrentLevel().equals("") && student.getCurrentLevel().charAt(0) <= '8'))) {
 			addLevel = true;
