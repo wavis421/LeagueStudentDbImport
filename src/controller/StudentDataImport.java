@@ -3,6 +3,7 @@ package controller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 import org.joda.time.DateTime;
@@ -13,6 +14,7 @@ import model.LogDataModel;
 import model.MySqlDatabase;
 import model.MySqlDbImports;
 import model.MySqlDbLogging;
+import model.StudentModel;
 import model.StudentNameModel;
 
 /**
@@ -62,26 +64,34 @@ public class StudentDataImport {
 		//MySqlDbLogging.insertLogData(LogDataModel.STARTING_TRACKER_IMPORT, new StudentNameModel("", "", false), 0,
 		//		" for " + today.toString("yyyy-MM-dd") + " ***");
 
+		DateTime startTime = new DateTime();
+		
 		MySqlDbImports sqlImportDb = new MySqlDbImports(sqlDb);
 		StudentImportEngine importer = new StudentImportEngine(sqlImportDb);
 		LocationLookup.setLocationData(sqlDb.getLocationList());
-
+		
 		// Remove log data older than 7 days
 		importer.removeOldLogData(7);
-
+		
 		// Connect to Pike13 and import data
 		Pike13Connect pike13Conn = new Pike13Connect(pike13Token);
 		Pike13DbImport pike13Api = new Pike13DbImport(sqlImportDb, pike13Conn);
 		importer.importStudentsFromPike13(pike13Api);
-		importer.importAttendanceFromPike13(startDateString, pike13Api);
-		importer.importScheduleFromPike13(pike13Api);
+		
+		// Now update active student list and continue imports
+		ArrayList<StudentModel> studentList = sqlImportDb.getActiveStudents();
+		importer.importAttendanceFromPike13(startDateString, pike13Api, studentList);
+		importer.importScheduleFromPike13(pike13Api, studentList);
 		importer.importCoursesFromPike13(pike13Api);
-		importer.importCourseAttendanceFromPike13(startDateString, courseEndDate, pike13Api);
+		importer.importCourseAttendanceFromPike13(startDateString, courseEndDate, pike13Api, studentList);
 
 		// Connect to Github and import data
 		GithubApi githubApi = new GithubApi(sqlImportDb, githubToken);
-		importer.importGithubComments(startDateString, githubApi);
+		importer.importGithubComments(startDateString, pike13Api, githubApi, studentList);
 
+		DateTime endTime = new DateTime();
+		System.out.println("Run time = " + (endTime.getMillis() - startTime.getMillis()) + " msecs");
+		
 		MySqlDbLogging.insertLogData(LogDataModel.TRACKER_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" for " + today.toString("yyyy-MM-dd") + " ***");
 
